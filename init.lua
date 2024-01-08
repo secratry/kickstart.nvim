@@ -297,6 +297,10 @@ require('lazy').setup({
   {
   'theHamsta/nvim-dap-virtual-text'
   },
+  {
+    'ldelossa/nvim-dap-projects'
+  },
+Public
 
 
 
