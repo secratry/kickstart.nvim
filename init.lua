@@ -289,10 +289,30 @@ require('lazy').setup({
   },
 
   {
+    "zbirenbaum/copilot.lua",
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'MunifTanjim/nui.nvim',
+    },
+    config = function()
+        require("copilot.config")
+    end
+  },
+  
+  {
+    'Exafunction/codeium.vim',
+    event = 'BufEnter'
+  },
+
+  {
   'mfussenegger/nvim-dap'
   },
   {
-  'rcarriga/nvim-dap-ui'
+  'rcarriga/nvim-dap-ui',
+  config = function()
+    require('dapui').setup()
+  end
+
   },
   {
   'theHamsta/nvim-dap-virtual-text'
@@ -378,6 +398,14 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 
 -- keymap for neotree 
 vim.keymap.set('n', '<C-n>', ':NvimTreeToggle<CR>')
+
+-- keymap for dap
+vim.keymap.set('n', "<leader>bn", function() require('dap').continue()end)
+vim.keymap.set('n', "<leader>bj", function() require('dap').step_over()end)
+vim.keymap.set('n', "<leader>bl", function() require('dap').step_into()end)
+vim.keymap.set('n', "<leader>bh", function() require('dap').step_out()end)
+vim.keymap.set('n', "<leader>B", function() require('dap').toggle_breakpoint()end)
+
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -493,10 +521,10 @@ vim.defer_fn(function()
     incremental_selection = {
       enable = true,
       keymaps = {
-        init_selection = '<c-space>',
-        node_incremental = '<c-space>',
+        -- init_selection = '<c-space>',
+        node_incremental = 'v',
         scope_incremental = '<c-s>',
-        node_decremental = '<M-space>',
+        node_decremental = 'V',
       },
     },
     textobjects = {
@@ -511,6 +539,10 @@ vim.defer_fn(function()
           ['if'] = '@function.inner',
           ['ac'] = '@class.outer',
           ['ic'] = '@class.inner',
+          ['a='] = '@assignment.outer',
+          ['i='] = '@assignment.inner',
+          ['l='] = '@assignment.lhs',
+          ['r='] = '@assignment.rhs',
         },
       },
       move = {
@@ -717,12 +749,58 @@ cmp.setup {
   },
 }
 
+-- [[ Configure copilot ]]
+
+require('copilot').setup({
+  panel = {
+    enabled = true,
+    auto_refresh = false,
+    keymap = {
+      jump_prev = "[[",
+      jump_next = "]]",
+      accept = "<CR>",
+      refresh = "gr",
+      open = "<M-CR>"
+    },
+    layout = {
+      position = "bottom", -- | top | left | right
+      ratio = 0.4
+    },
+  },
+  suggestion = {
+    enabled = true,
+    auto_trigger = false,
+    debounce = 75,
+    keymap = {
+      accept = "<M-l>",
+      accept_word = false,
+      accept_line = false,
+      next = "<M-]>",
+      prev = "<M-[>",
+      dismiss = "<C-]>",
+    },
+  },
+  filetypes = {
+    yaml = false,
+    markdown = false,
+    help = false,
+    gitcommit = false,
+    gitrebase = false,
+    hgcommit = false,
+    svn = false,
+    cvs = false,
+    ["."] = false,
+  },
+  copilot_node_command = 'node', -- Node.js version must be > 18.x
+  server_opts_overrides = {},
+})
+
 -- [[ Configure nvim-dap ]]
 
 local dap = require('dap')
 dap.adapters.lldb = {
   type = 'executable',
-  command = '/path/to/lldb-vscode', -- adjust this to your lldb-vscode path
+  command = '/usr/bin/lldb-vscode', -- adjust this to your lldb-vscode path
   name = 'lldb'
 }
 
