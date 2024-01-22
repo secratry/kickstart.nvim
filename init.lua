@@ -255,16 +255,16 @@ require('lazy').setup({
   },
 
   {
-  "nvim-tree/nvim-tree.lua",
-  version = "*",
-  lazy = false,
-  dependencies = {
-    "nvim-tree/nvim-web-devicons",
+    "nvim-tree/nvim-tree.lua",
+    version = "*",
+    lazy = false,
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+    },
+    config = function()
+      require("nvim-tree").setup {}
+    end,
   },
-  config = function()
-    require("nvim-tree").setup {}
-  end,
-},
 
   {
     "nvim-neo-tree/neo-tree.nvim", enabled = false,
@@ -298,30 +298,59 @@ require('lazy').setup({
         require("copilot.config")
     end
   },
-  
+
   {
     'Exafunction/codeium.vim',
     event = 'BufEnter'
   },
 
   {
-  'mfussenegger/nvim-dap'
-  },
-  {
-  'rcarriga/nvim-dap-ui',
-  config = function()
-    require('dapui').setup()
-  end
+  'mfussenegger/nvim-dap',
+    dependencies = {
+      {'rcarriga/nvim-dap-ui'},
+      {'theHamsta/nvim-dap-virtual-text'},
+    },
+    keys = {
+      {'n', "<leader>bn", function() require('dap').continue()end, desc = "Continue",},
+      {'n', "<leader>bj", function() require('dap').step_over()end, desc = "", },
+      {'n', "<leader>bl", function() require('dap').step_into()end, desc = "", },
+      {'n', "<leader>bh", function() require('dap').step_out()end, desc = "", },
+      {'n', "<leader>B", function() require('dap').toggle_breakpoint()end, desc = "Toogle breakpoint",},
+    },
+    opts = {},
+    config = function(plugin, opts)
+      require('nvim-dap-virtual-text').setup{
+        commented = true,
+      }
+      local dap, dapui = require ("dap"), require("dapui")
+      dapui.setup()
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
 
+--      for k, _ in pairs(opts.setup) do
+--        opts.setup[k](plugin, opts)
+--      end
+    end,
   },
+--  {
+--  'rcarriga/nvim-dap-ui',
+--  config = function()
+--    require('dapui').setup()
+--  end
+--  }
   {
   'theHamsta/nvim-dap-virtual-text'
   },
   {
     'ldelossa/nvim-dap-projects'
   },
-Public
-
 
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -400,11 +429,13 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('n', '<C-n>', ':NvimTreeToggle<CR>')
 
 -- keymap for dap
-vim.keymap.set('n', "<leader>bn", function() require('dap').continue()end)
-vim.keymap.set('n', "<leader>bj", function() require('dap').step_over()end)
-vim.keymap.set('n', "<leader>bl", function() require('dap').step_into()end)
-vim.keymap.set('n', "<leader>bh", function() require('dap').step_out()end)
-vim.keymap.set('n', "<leader>B", function() require('dap').toggle_breakpoint()end)
+vim.keymap.set('n', "<leader>bn", function() require('dap').continue()end, { desc = 'Continue'})
+vim.keymap.set('n', "<leader>bj", function() require('dap').step_over()end, { desc = 'Step over'})
+vim.keymap.set('n', "<leader>bl", function() require('dap').step_into()end,{desc = 'Step into'})
+vim.keymap.set('n', "<leader>bh", function() require('dap').step_out()end,{desc = 'Step out'})
+vim.keymap.set('n', "<leader>B", function() require('dap').toggle_breakpoint()end, {desc = 'Toogle breakpoint'})
+vim.keymap.set('n', '<Leader>bt', function() require('dapui').toggle()end, {desc = 'Toogle debug UI'})
+vim.keymap.set('n', '<Leader>bx', function() require('dap').terminate()end, {desc = 'Terminate debug session'})
 
 
 -- [[ Highlight on yank ]]
